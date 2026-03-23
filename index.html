@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Talia Job Tracker</title>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --panel: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #dbe2ea;
+      --accent: #2563eb;
+      --accent-soft: #dbeafe;
+      --high-bg: #dcfce7;
+      --high-text: #166534;
+      --med-bg: #fef3c7;
+      --med-text: #92400e;
+      --low-bg: #ffedd5;
+      --low-text: #9a3412;
+      --applied-bg: #eef2f7;
+      --shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background: var(--bg);
+    }
+
+    a { color: inherit; }
+
+    .page {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 28px 20px 48px;
+    }
+
+    .header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-start;
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      margin: 0 0 6px;
+      font-size: 1.95rem;
+      line-height: 1.08;
+    }
+
+    .subtext {
+      margin: 0;
+      color: var(--muted);
+      max-width: 780px;
+      line-height: 1.35;
+      font-size: 0.84rem;
+    }
+
+    .toolbar, .filters, .stat, .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      padding: 14px 16px;
+      margin-bottom: 16px;
+    }
+
+    .filters {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .statbar {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 22px;
+    }
+
+    .stat {
+      padding: 10px 12px;
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .stat-label {
+      color: var(--muted);
+      font-size: 0.78rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .stat-value {
+      font-size: 1.2rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    label {
+      display: block;
+      font-size: 0.84rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    input[type="text"], select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #fff;
+      font-size: 0.92rem;
+    }
+
+    button, .button-link {
+      border: 0;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: transform 0.08s ease, opacity 0.2s ease;
+      white-space: nowrap;
+    }
+
+    button:hover, .button-link:hover { transform: translateY(-1px); }
+
+    .primary {
+      background: var(--accent);
+      color: white;
+    }
+
+    .secondary {
+      background: #eef2ff;
+      color: #3730a3;
+    }
+
+    .ghost {
+      background: #f8fafc;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .mini-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      padding: 8px 10px;
+      border-radius: 9px;
+      border: 1px solid var(--border);
+      background: #fff;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .mini-link:hover {
+      background: #f8fafc;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin: 26px 0 12px;
+    }
+
+    .section-header h2 {
+      margin: 0;
+      font-size: 1.2rem;
+    }
+
+    .cards {
+      display: grid;
+      gap: 14px;
+    }
+
+    .card {
+      padding: 16px;
+    }
+
+    .card.applied {
+      background: var(--applied-bg);
+      color: #4b5563;
+    }
+
+    .card-top {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .title-block h3 {
+      margin: 0 0 4px;
+      font-size: 1.05rem;
+      line-height: 1.25;
+    }
+
+    .title-link {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .title-link:hover {
+      text-decoration: underline;
+    }
+
+    .company-line {
+      color: var(--muted);
+      font-size: 0.94rem;
+    }
+
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      background: #f3f4f6;
+      color: #374151;
+      white-space: nowrap;
+    }
+
+    .alignment-high { background: var(--high-bg); color: var(--high-text); }
+    .alignment-medium { background: var(--med-bg); color: var(--med-text); }
+    .alignment-low { background: var(--low-bg); color: var(--low-text); }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .field {
+      background: rgba(255,255,255,0.72);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 12px;
+      min-width: 0;
+    }
+
+    .card.applied .field {
+      background: rgba(255,255,255,0.45);
+    }
+
+    .field-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .field-value {
+      font-size: 0.93rem;
+      line-height: 1.4;
+      word-break: break-word;
+    }
+
+    .card-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+    }
+
+    .checkbox-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.93rem;
+    }
+
+    .checkbox-wrap input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--accent);
+    }
+
+    .action-right {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .footer-note {
+      margin-top: 28px;
+      color: var(--muted);
+      font-size: 0.88rem;
+      line-height: 1.45;
+    }
+
+    .hidden { display: none; }
+
+    @media (max-width: 860px) {
+      .statbar {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 720px) {
+      .card-actions {
+        align-items: stretch;
+      }
+
+      .action-right {
+        width: 100%;
+        justify-content: flex-start;
+      }
+
+      .statbar {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="header">
+      <div>
+        <h1>Talia Job Tracker</h1>
+        <p class="subtext">
+          Static GitHub Pages job tracker for Madison-area roles. Update <code>jobs.json</code> when you find new openings. Applied status is saved in this browser, and you can export a merged JSON file when you want to commit changes.
+        </p>
+      </div>
+      <div class="muted" id="lastUpdated">Loading jobs...</div>
+    </div>
+
+    <div class="toolbar">
+      <button class="primary" id="exportBtn">Export current jobs JSON</button>
+      <button class="secondary" id="downloadTemplateBtn">Download blank template</button>
+      <button class="ghost" id="clearAppliedBtn">Clear local applied states</button>
+      <span class="muted">Source file: <code>jobs.json</code></span>
+    </div>
+
+    <div class="filters">
+      <div>
+        <label for="searchInput">Search</label>
+        <input id="searchInput" type="text" placeholder="Title, company, location, industry..." />
+      </div>
+      <div>
+        <label for="alignmentFilter">Alignment</label>
+        <select id="alignmentFilter">
+          <option value="all">All</option>
+          <option value="high">High</option>
+          <option value="medium">Medium</option>
+          <option value="low">Low</option>
+        </select>
+      </div>
+      <div>
+        <label for="commuteFilter">Commute</label>
+        <select id="commuteFilter">
+          <option value="all">All</option>
+          <option value="30">≤ 30 min</option>
+          <option value="60">31-60 min</option>
+          <option value="unknown">Unknown</option>
+        </select>
+      </div>
+      <div>
+        <label for="industryFilter">Industry</label>
+        <select id="industryFilter">
+          <option value="all">All</option>
+        </select>
+      </div>
+      <div>
+        <label for="sourceFilter">Source</label>
+        <select id="sourceFilter">
+          <option value="all">All</option>
+        </select>
+      </div>
+      <div>
+        <label for="sortSelect">Sort</label>
+        <select id="sortSelect">
+          <option value="alignment">Fit then commute</option>
+          <option value="company">Company</option>
+          <option value="location">Location</option>
+          <option value="title">Title</option>
+          <option value="newest">Newest posted</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="statbar">
+      <div class="stat"><div class="stat-label">Shown</div><div class="stat-value" id="visibleCount">0</div></div>
+      <div class="stat"><div class="stat-label">Open</div><div class="stat-value" id="activeCount">0</div></div>
+      <div class="stat"><div class="stat-label">Applied</div><div class="stat-value" id="appliedCount">0</div></div>
+      <div class="stat"><div class="stat-label">High fit</div><div class="stat-value" id="highCount">0</div></div>
+    </div>
+
+    <div class="section-header">
+      <h2>Open roles to review</h2>
+      <div class="muted" id="activeSectionSummary"></div>
+    </div>
+    <div class="cards" id="activeJobs"></div>
+
+    <div class="section-header">
+      <h2>Applied / archived</h2>
+      <div class="muted" id="appliedSectionSummary"></div>
+    </div>
+    <div class="cards" id="appliedJobs"></div>
+
+    <p class="footer-note">
+      This is fully static, so applied status lives in local browser storage until you export and commit the updated <code>jobs.json</code>.
+    </p>
+  </div>
+
+  <script>
+    const DATA_FILE = './jobs.json';
+    const STORAGE_KEY = 'talia-job-tracker-state-v2';
+
+    const state = {
+      jobs: [],
+      appliedMap: loadAppliedMap(),
+      filters: {
+        search: '',
+        alignment: 'all',
+        commute: 'all',
+        industry: 'all',
+        source: 'all',
+        sort: 'alignment'
+      }
+    };
+
+    const els = {
+      activeJobs: document.getElementById('activeJobs'),
+      appliedJobs: document.getElementById('appliedJobs'),
+      visibleCount: document.getElementById('visibleCount'),
+      activeCount: document.getElementById('activeCount'),
+      appliedCount: document.getElementById('appliedCount'),
+      highCount: document.getElementById('highCount'),
+      activeSectionSummary: document.getElementById('activeSectionSummary'),
+      appliedSectionSummary: document.getElementById('appliedSectionSummary'),
+      industryFilter: document.getElementById('industryFilter'),
+      sourceFilter: document.getElementById('sourceFilter'),
+      lastUpdated: document.getElementById('lastUpdated')
+    };
+
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      state.filters.search = e.target.value.trim().toLowerCase();
+      render();
+    });
+    document.getElementById('alignmentFilter').addEventListener('change', (e) => {
+      state.filters.alignment = e.target.value;
+      render();
+    });
+    document.getElementById('commuteFilter').addEventListener('change', (e) => {
+      state.filters.commute = e.target.value;
+      render();
+    });
+    document.getElementById('industryFilter').addEventListener('change', (e) => {
+      state.filters.industry = e.target.value;
+      render();
+    });
+    document.getElementById('sourceFilter').addEventListener('change', (e) => {
+      state.filters.source = e.target.value;
+      render();
+    });
+    document.getElementById('sortSelect').addEventListener('change', (e) => {
+      state.filters.sort = e.target.value;
+      render();
+    });
+
+    document.getElementById('exportBtn').addEventListener('click', exportMergedJson);
+    document.getElementById('downloadTemplateBtn').addEventListener('click', downloadBlankTemplate);
+    document.getElementById('clearAppliedBtn').addEventListener('click', () => {
+      if (!confirm('Clear all locally saved applied states in this browser?')) return;
+      state.appliedMap = {};
+      saveAppliedMap();
+      render();
+    });
+
+    init();
+
+    async function init() {
+      try {
+        const response = await fetch(DATA_FILE, { cache: 'no-store' });
+        if (!response.ok) throw new Error('Could not load jobs.json');
+        const payload = await response.json();
+        state.jobs = normalizeJobs(payload.jobs || payload);
+        populateFilterOptions();
+        els.lastUpdated.textContent = payload.lastUpdated
+          ? `Data updated: ${payload.lastUpdated}`
+          : `Loaded ${state.jobs.length} jobs`;
+        render();
+      } catch (error) {
+        els.lastUpdated.textContent = 'Failed to load jobs.json';
+        els.activeJobs.innerHTML = `<div class="card"><strong>Could not load jobs.</strong><div class="muted">${escapeHtml(error.message)}</div></div>`;
+      }
+    }
+
+    function normalizeJobs(jobs) {
+      return jobs.map((job, index) => {
+        const companyLink = job.companyLink || inferLinkByDomain(job.link, 'company');
+        const linkedinLink = job.linkedinLink || inferLinkByDomain(job.link, 'linkedin');
+        const indeedLink = job.indeedLink || inferLinkByDomain(job.link, 'indeed');
+        const glassdoorLink = job.glassdoorLink || inferLinkByDomain(job.link, 'glassdoor');
+        const primaryLink = companyLink || linkedinLink || indeedLink || glassdoorLink || job.link || '#';
+
+        return {
+          id: job.id || slugify(`${job.company}-${job.title}-${job.location || index}`),
+          title: job.title || 'Untitled role',
+          company: job.company || 'Unknown company',
+          location: job.location || 'Unknown location',
+          industry: job.industry || 'Unknown industry',
+          alignment: (job.alignment || 'medium').toLowerCase(),
+          alignmentLabel: job.alignmentLabel || capitalize(job.alignment || 'medium'),
+          commuteMinutes: normalizeMinutes(job.commuteMinutes),
+          commuteBand: job.commuteBand || inferCommuteBand(normalizeMinutes(job.commuteMinutes)),
+          companyLink,
+          linkedinLink,
+          indeedLink,
+          glassdoorLink,
+          link: primaryLink,
+          primaryLinkLabel: job.primaryLinkLabel || primaryLinkText(companyLink, linkedinLink, indeedLink, glassdoorLink),
+          source: job.source || 'manual',
+          notes: job.notes || '',
+          postedDate: job.postedDate || '',
+          applied: typeof job.applied === 'boolean' ? job.applied : false
+        };
+      });
+    }
+
+    function normalizeMinutes(value) {
+      const parsed = Number(value);
+      return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+    }
+
+    function inferLinkByDomain(url, type) {
+      if (!url) return '';
+      try {
+        const host = new URL(url).hostname.toLowerCase();
+        if (type === 'linkedin' && host.includes('linkedin.com')) return url;
+        if (type === 'indeed' && host.includes('indeed.com')) return url;
+        if (type === 'glassdoor' && host.includes('glassdoor.com')) return url;
+        if (type === 'company' && !host.includes('linkedin.com') && !host.includes('indeed.com') && !host.includes('glassdoor.com')) return url;
+      } catch (_) {}
+      return '';
+    }
+
+    function primaryLinkText(companyLink, linkedinLink, indeedLink, glassdoorLink) {
+      if (companyLink) return 'Company site';
+      if (linkedinLink) return 'LinkedIn';
+      if (indeedLink) return 'Indeed';
+      if (glassdoorLink) return 'Glassdoor';
+      return 'Open posting';
+    }
+
+    function inferCommuteBand(minutes) {
+      if (!minutes) return 'unknown';
+      if (minutes <= 30) return '30';
+      if (minutes <= 60) return '60';
+      return '60+';
+    }
+
+    function loadAppliedMap() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+      } catch {
+        return {};
+      }
+    }
+
+    function saveAppliedMap() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state.appliedMap));
+    }
+
+    function populateFilterOptions() {
+      const industries = [...new Set(state.jobs.map(j => j.industry).filter(Boolean))].sort();
+      const sources = [...new Set(state.jobs.map(j => j.source).filter(Boolean))].sort();
+      setSelectOptions(els.industryFilter, industries);
+      setSelectOptions(els.sourceFilter, sources);
+    }
+
+    function setSelectOptions(select, values) {
+      const current = select.value;
+      values.forEach(value => {
+        const option = document.createElement('option');
+        option.value = value;
+        option.textContent = value;
+        select.appendChild(option);
+      });
+      select.value = current || 'all';
+    }
+
+    function getApplied(job) {
+      return state.appliedMap[job.id] ?? job.applied ?? false;
+    }
+
+    function setApplied(jobId, value) {
+      state.appliedMap[jobId] = value;
+      saveAppliedMap();
+      render();
+    }
+
+    function getFilteredJobs() {
+      const filtered = state.jobs.filter(job => {
+        const text = [
+          job.title, job.company, job.location, job.industry, job.notes, job.source,
+          job.alignmentLabel, job.companyLink, job.linkedinLink, job.indeedLink, job.glassdoorLink
+        ].join(' ').toLowerCase();
+
+        if (state.filters.search && !text.includes(state.filters.search)) return false;
+        if (state.filters.alignment !== 'all' && job.alignment !== state.filters.alignment) return false;
+        if (state.filters.commute !== 'all' && job.commuteBand !== state.filters.commute) return false;
+        if (state.filters.industry !== 'all' && job.industry !== state.filters.industry) return false;
+        if (state.filters.source !== 'all' && job.source !== state.filters.source) return false;
+        return true;
+      });
+
+      filtered.sort((a, b) => sortJobs(a, b, state.filters.sort));
+      return filtered;
+    }
+
+    function sortJobs(a, b, mode) {
+      const alignRank = { high: 0, medium: 1, low: 2 };
+      if (mode === 'company') return a.company.localeCompare(b.company) || a.title.localeCompare(b.title);
+      if (mode === 'location') return a.location.localeCompare(b.location) || a.company.localeCompare(b.company);
+      if (mode === 'title') return a.title.localeCompare(b.title);
+      if (mode === 'newest') return (b.postedDate || '').localeCompare(a.postedDate || '') || a.company.localeCompare(b.company);
+      return (alignRank[a.alignment] ?? 9) - (alignRank[b.alignment] ?? 9)
+        || compareCommute(a.commuteMinutes, b.commuteMinutes)
+        || a.company.localeCompare(b.company)
+        || a.title.localeCompare(b.title);
+    }
+
+    function compareCommute(a, b) {
+      const av = a ?? 9999;
+      const bv = b ?? 9999;
+      return av - bv;
+    }
+
+    function render() {
+      const jobs = getFilteredJobs();
+      const activeJobs = jobs.filter(job => !getApplied(job));
+      const appliedJobs = jobs.filter(job => getApplied(job));
+
+      els.visibleCount.textContent = jobs.length;
+      els.activeCount.textContent = activeJobs.length;
+      els.appliedCount.textContent = appliedJobs.length;
+      els.highCount.textContent = jobs.filter(j => j.alignment === 'high').length;
+      els.activeSectionSummary.textContent = `${activeJobs.length} roles`;
+      els.appliedSectionSummary.textContent = `${appliedJobs.length} roles`;
+
+      els.activeJobs.innerHTML = activeJobs.length ? activeJobs.map(jobCardHtml).join('') : emptyStateHtml('No active roles match the current filters.');
+      els.appliedJobs.innerHTML = appliedJobs.length ? appliedJobs.map(jobCardHtml).join('') : emptyStateHtml('No roles marked applied yet.');
+
+      document.querySelectorAll('[data-job-checkbox]').forEach(checkbox => {
+        checkbox.addEventListener('change', (e) => {
+          setApplied(e.target.dataset.jobCheckbox, e.target.checked);
+        });
+      });
+    }
+
+    function jobCardHtml(job) {
+      const applied = getApplied(job);
+      const alignmentLabel = job.alignmentLabel ? `${job.alignmentLabel} fit` : `${capitalize(job.alignment)} fit`;
+      const commuteText = job.commuteMinutes
+        ? `${job.commuteMinutes} min commute`
+        : job.commuteBand === '30'
+          ? 'Within 30 min'
+          : job.commuteBand === '60'
+            ? 'Within 60 min'
+            : 'Commute unknown';
+
+      return `
+        <article class="card ${applied ? 'applied' : ''}">
+          <div class="card-top">
+            <div class="title-block">
+              <h3>
+                <a class="title-link" href="${escapeAttribute(job.link)}" target="_blank" rel="noopener noreferrer">
+                  ${escapeHtml(job.title)}
+                </a>
+              </h3>
+              <div class="company-line">${escapeHtml(job.company)} · ${escapeHtml(job.location)}</div>
+            </div>
+            <div class="pill-row">
+              <span class="pill alignment-${escapeHtml(job.alignment)}">${escapeHtml(alignmentLabel)}</span>
+              <span class="pill">${escapeHtml(commuteText)}</span>
+              <span class="pill">${escapeHtml(job.source)}</span>
+            </div>
+          </div>
+
+          <div class="card-grid">
+            <div class="field">
+              <div class="field-label">Industry</div>
+              <div class="field-value">${escapeHtml(job.industry)}</div>
+            </div>
+            <div class="field">
+              <div class="field-label">Location</div>
+              <div class="field-value">${escapeHtml(job.location)}</div>
+            </div>
+            <div class="field">
+              <div class="field-label">Primary link</div>
+              <div class="field-value">${escapeHtml(job.primaryLinkLabel || 'Open posting')}</div>
+            </div>
+            <div class="field">
+              <div class="field-label">Alignment note</div>
+              <div class="field-value">${escapeHtml(job.notes || 'No notes added yet.')}</div>
+            </div>
+          </div>
+
+          <div class="card-actions">
+            <label class="checkbox-wrap">
+              <input type="checkbox" data-job-checkbox="${escapeHtml(job.id)}" ${applied ? 'checked' : ''} />
+              <span>${applied ? 'Applied / archived' : 'Mark applied'}</span>
+            </label>
+            <div class="action-right">
+              ${renderLinkButtons(job, applied)}
+            </div>
+          </div>
+        </article>
+      `;
+    }
+
+    function renderLinkButtons(job, applied) {
+      const links = [];
+      const primaryText = job.primaryLinkLabel ? `Apply / ${job.primaryLinkLabel}` : 'Apply / view';
+      if (job.link && job.link !== '#') {
+        links.push(`<a class="button-link ${applied ? 'ghost' : 'primary'}" href="${escapeAttribute(job.link)}" target="_blank" rel="noopener noreferrer">${escapeHtml(primaryText)}</a>`);
+      }
+      if (job.linkedinLink && job.linkedinLink !== job.link) {
+        links.push(`<a class="mini-link" href="${escapeAttribute(job.linkedinLink)}" target="_blank" rel="noopener noreferrer">LinkedIn</a>`);
+      }
+      if (job.indeedLink && job.indeedLink !== job.link) {
+        links.push(`<a class="mini-link" href="${escapeAttribute(job.indeedLink)}" target="_blank" rel="noopener noreferrer">Indeed</a>`);
+      }
+      if (job.glassdoorLink && job.glassdoorLink !== job.link) {
+        links.push(`<a class="mini-link" href="${escapeAttribute(job.glassdoorLink)}" target="_blank" rel="noopener noreferrer">Glassdoor</a>`);
+      }
+      if (job.companyLink && job.companyLink !== job.link) {
+        links.push(`<a class="mini-link" href="${escapeAttribute(job.companyLink)}" target="_blank" rel="noopener noreferrer">Company</a>`);
+      }
+      return links.join('');
+    }
+
+    function emptyStateHtml(message) {
+      return `<div class="card"><div class="muted">${escapeHtml(message)}</div></div>`;
+    }
+
+    function exportMergedJson() {
+      const merged = {
+        lastUpdated: new Date().toISOString().slice(0, 10),
+        jobs: state.jobs.map(job => ({
+          id: job.id,
+          title: job.title,
+          company: job.company,
+          location: job.location,
+          industry: job.industry,
+          alignment: job.alignment,
+          alignmentLabel: job.alignmentLabel,
+          commuteMinutes: job.commuteMinutes,
+          commuteBand: job.commuteBand,
+          companyLink: job.companyLink,
+          linkedinLink: job.linkedinLink,
+          indeedLink: job.indeedLink,
+          glassdoorLink: job.glassdoorLink,
+          link: job.link,
+          primaryLinkLabel: job.primaryLinkLabel,
+          source: job.source,
+          postedDate: job.postedDate,
+          notes: job.notes,
+          applied: getApplied(job)
+        }))
+      };
+      downloadFile('jobs.updated.json', JSON.stringify(merged, null, 2), 'application/json');
+    }
+
+    function downloadBlankTemplate() {
+      const template = {
+        lastUpdated: '2026-03-23',
+        jobs: [
+          {
+            id: 'example-company-mechanical-engineer-madison',
+            title: 'Mechanical Engineer I',
+            company: 'Example Company',
+            location: 'Madison, WI',
+            industry: 'Industrial Manufacturing',
+            alignment: 'high',
+            alignmentLabel: 'Very high',
+            commuteMinutes: 18,
+            commuteBand: '30',
+            companyLink: 'https://example.com/jobs/123',
+            linkedinLink: 'https://www.linkedin.com/jobs/view/example',
+            indeedLink: 'https://www.indeed.com/viewjob?jk=example',
+            glassdoorLink: '',
+            link: 'https://example.com/jobs/123',
+            primaryLinkLabel: 'Company site',
+            source: 'LinkedIn',
+            postedDate: '2026-03-23',
+            notes: 'Strong mechanical / manufacturing fit with reasonable downtown Madison commute.',
+            applied: false
+          }
+        ]
+      };
+      downloadFile('jobs.template.json', JSON.stringify(template, null, 2), 'application/json');
+    }
+
+    function downloadFile(filename, content, mimeType) {
+      const blob = new Blob([content], { type: mimeType });
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = filename;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function slugify(value) {
+      return String(value)
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+        .slice(0, 120);
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function escapeAttribute(value) {
+      return escapeHtml(value);
+    }
+
+    function capitalize(value) {
+      const text = String(value || '');
+      return text.charAt(0).toUpperCase() + text.slice(1);
+    }
+  </script>
+</body>
+</html>
